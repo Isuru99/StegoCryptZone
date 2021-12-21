@@ -1,6 +1,6 @@
 import PySimpleGUI as sg
 
-sg.theme('Black')
+sg.theme('DarkTeal9')
 
 tab1_layout = [
     [
@@ -24,7 +24,22 @@ tab1_layout = [
             [sg.Text(text="File", key='image_file_title')],
             [sg.Column([[sg.Input(key='image_file', disabled_readonly_background_color='black'), sg.FileBrowse(key='image_file_browse', file_types=(('PNG Files', '*.png'), ))]], key='image_file_row')],
             [sg.Text(text='', key='image_file_message', size=(40, 2))]
-        ])
+        ], vertical_alignment='top'),
+        sg.VerticalSeparator(),
+sg.Column([
+            [
+                sg.Radio("Text", 'text_file_radios', key='text_radio', default=True, enable_events=True),
+                sg.Radio("File", 'text_file_radios', key='file_radio', default=False, enable_events=True)
+            ],
+            [sg.Text(text="File", key='file_title')],
+            [sg.Column([[sg.Input(key='file', disabled_readonly_background_color='black', disabled=True), sg.FileBrowse(key='file_browse', disabled=True)]], key='file_row')],
+            [sg.Text(text='', key='encrypt_file_text', size=(40, 2))],
+
+            [sg.Text(text="Text", key='text_title')],
+            [sg.Multiline(default_text='Your Message Here', size=(40,15), key='message')],
+            [sg.Text(text='', key='encrypt_message_text', size=(40,2))],
+            [sg.Column([[sg.Button(button_text="Encrypt", key='encrypt_button')]])]
+       ], vertical_alignment='top')
     ]
 ]
 
@@ -35,6 +50,7 @@ layout = [
         ])
     ]
 ]
+
 
 window = sg.Window("SteganoCryptZone", layout)
 while True:
