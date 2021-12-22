@@ -38,15 +38,58 @@ sg.Column([
             [sg.Text(text="Text", key='text_title')],
             [sg.Multiline(default_text='Your Message Here', size=(40,15), key='message')],
             [sg.Text(text='', key='encrypt_message_text', size=(40,2))],
+
             [sg.Column([[sg.Button(button_text="Encrypt", key='encrypt_button')]])]
        ], vertical_alignment='top')
+    ]
+]
+
+tab2_layout = [
+    [
+        sg.Column([
+            [sg.Text(text="Stego Media File", key='stego_file_title')],
+            [sg.Column([[sg.Input(key='stego_file'), sg.FileBrowse(key='stego_file_browse')]], key='stego_file_row')],
+            [sg.Text(text='', key='stego_file_message', size=(40,2))],
+
+            [sg.Text(text="Private key", key='private_key_title')],
+            [sg.Column([[sg.Input(key='private_key'), sg.FileBrowse(key='private_key_browse', file_types=(('PEM Files', '*.pem'), ))]], key='private_key_row')],
+            [sg.Text(text='', key='private_key_message', size=(40, 2))],
+
+            [sg.Text(text="Output folder", key='output_decrypt_dir_title')],
+            [sg.Column([[sg.Input(key='output_decrypt_dir', disabled_readonly_background_color='black'), sg.FolderBrowse(key='output_decrypt_dir_browse')]], key='output_decrypt_dir_row')],
+            [sg.Text(text='', key='output_decrypt_dir_message', size=(40, 2))]
+
+
+        ], vertical_alignment='top'),
+        sg.VerticalSeparator(),
+
+        sg.Column([
+            [sg.Text(text="Decrypted Message", key='decrypted_message_title')],
+            [sg.Multiline(size=(40, 15), disabled=True, key='decrypted_message')],
+            [sg.Text(text='', key='decrypted_message', size=(40, 2))],
+            [sg.Column([[sg.Button(button_text="Decrypt", key='decrypt_button')]])]
+
+        ], vertical_alignment='top')
+    ]
+]
+
+tab3_layout = [
+    [
+        sg.Column([
+            [sg.Text("Key Size")],
+            [sg.Combo(('2048', '3072', '4096', '8192'), default_value='3072', key='key_size_combo')],
+            [sg.Text("Output folder")],
+            [sg.Column([[sg.Input(key='keys_dir'), sg.FolderBrowse(key='keys_dir_browse')]], key='keys_dir_row')],
+            [sg.Text(text='', key='keys_dir_message', size=(40, 2))],
+            [sg.Button(button_text="Generate Keys", key='generate_button')]
+        ], vertical_alignment='top')
     ]
 ]
 
 layout = [
     [
         sg.TabGroup([
-            [sg.Tab("Encrypt", tab1_layout)]
+            [sg.Tab("Encrypt", tab1_layout), sg.Tab("Decrypt", tab2_layout), sg.Tab("Key Generator", tab3_layout)]
         ])
     ]
 ]
