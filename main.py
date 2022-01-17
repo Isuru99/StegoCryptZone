@@ -1,3 +1,5 @@
+import os.path
+
 import PySimpleGUI as sg
 
 sg.theme('DarkTeal9')
@@ -101,5 +103,31 @@ while True:
     event, values = window.read()
     if event == sg.WIN_CLOSED:
         break
+
+    elif event == ['generate_button']:
+          if not os.path.exists(values['keys_dir']):
+              window['keys_dir_message'].update("Invalid Folder", text_color='red')
+
+    else:
+         try:
+              cryto.GenerateKeyPair(values['keys_dir'], int(values['key_size_combo']))
+              window['keys_dir_message'].update("Successfully generated key pair", text_color='green')
+
+
+    except Exception as exception:
+           window['keys_dir_message'].update("Unable to generate key pair\n" + str(exception), text_color='red')
+
+     elif event == ['encrypt_button']:
+         if not os.path.exists(values['output_dir']):
+               window['output_dir_message'].update("Invalid folder", text_color='red')
+
+         if values ['no_encryption_radio'] is False:
+             if not os.path.exists(values['public_key']):
+                window['public_key_message'].update("Invalid PEM file", text_color='red')
+
+         if values['image_checkbox']:
+             if not os.path.exists(values['public_key']):
+               window['image_file_message'].update("Invalid PNG file", text_color='red')
+
 
 window.close()
