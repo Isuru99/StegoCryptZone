@@ -1,52 +1,85 @@
 from PIL import Image
 
 
-def gData(data):
+def GenerateData(data, bin = False):
+    newData = []
+    for i in data:
+        newData.append(format(ord(i), '08b'))
 
-    nData = []
-        for a in data:
-            nData.append(format (ord(a), '08b'))
+    return newData
 
-        return nData
 
-def modiPixel(pix, data):
-    datalist = gData(data)
+def ModifyPixels(pix, data):
+    datalist = GenerateData(data)
     lendata = len(datalist)
     imdata = iter(pix)
-
-    for a in range(lendata):
-
+    for i in range(lendata):
         pix = [value for value in imdata.__next__()[:3] + imdata.__next__()[:3] + imdata.__next__()[:3]]
-        for b in range(0, 8):
-            if (datalist[a][b] == '0' and pix[b] % 2 != 0):
-                pix[b] -= 1
+        for j in range(0, 8):
+            if (datalist[i][j] == '0' and pix[j] % 2 != 0):
+                pix[j] -= 1
 
-            elif (datalist[a][b] == '0' and pix[j] % 2 == 0):
-                if(pix[b] != 0):
-                    pix[b] -= 1
+            elif (datalist[i][j] == '1' and pix[j] % 2 == 0):
+                if(pix[j] != 0):
+                    pix[j] -= 1
 
                 else:
-                    pix[b] += 1
+                    pix[j] += 1
 
-def encode(imgPath, data, output):
-    img = Image.open(imgPath, 'r')
-    nImg = img.copy()
-    encode_enc(nImg, data)
-    nImg.save(output, 'PNG')
-    nImg.save(output, 'JPEG')
+        if (i == lendata - 1):
+            if (pix[-1] % 2 == 0):
+                if(pix[-1] != 0):
+                    pix[-1] -= 1
 
-def decode(imgPath):
-    img = Image.open(imgPath, 'r')
+                else:
+                    pix[-1] += 1
+
+        else:
+            if (pix[-1] % 2 != 0):
+                pix[-1] -= 1
+
+        pix = tuple(pix)
+        yield pix[0:3]
+        yield pix[3:6]
+        yield pix[6:9]
+
+
+def encode_enc(newImage, data):
+    width = newImage.size[0]
+    (x, y) = (0, 0)
+    for pixel in ModifyPixels(newImage.getdata(), data):
+        newImage.putpixel((x, y), pixel)
+        if (x == width - 1):
+            x = 0
+            y += 1
+
+        else:
+            x += 1
+
+
+def Encode(imagePath, data, output):
+    image = Image.open(imagePath, 'r')
+    newImage = image.copy()
+    encode_enc(newImage, data)
+    newImage.save(output, '')
+
+
+
+def Decode(imagePath):
+    image = Image.open(imagePath, 'r')
     data = ''
-    imgdata = iter(img.getdata())
-
+    imgdata = iter(image.getdata())
     while (True):
-        pixles = []
+        pixels = [value for value in imgdata.__next__()[:3] + imgdata.__next__()[:3] + imgdata.__next__()[:3]]
+        binstr = ''
+        for i in pixels[:8]:
+            if (i % 2 == 0):
+                binstr += '0'
 
+            else:
+                binstr += '1'
 
+        data += chr(int(binstr, 2))
 
-
-
-
-
-
+        if (pixels[-1] % 2 != 0):
+            return data
