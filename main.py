@@ -1,5 +1,6 @@
 import os.path
 import PySimpleGUI as sg
+import ImgStego as stego
 
 
 sg.theme('DarkTeal9')
@@ -22,7 +23,7 @@ tab1_layout = [
             [sg.Text(text='', key='public_key_msg', size=(40, 2))],
 
             [sg.Text(text="Image File", key='img_heading')],
-            [sg.Column([[sg.Input(key='image', disabled_readonly_background_color='black'), sg.FileBrowse(key='img_browse', file_types=(('PNG Files', '*.png'), ))]], key='img_row')],
+            [sg.Column([[sg.Input(key='img_file', disabled_readonly_background_color='black'), sg.FileBrowse(key='img_browse', file_types=(('PNG Files', '*.png'), ('JPEG', '*.jpg')))]], key='img_row')],
             [sg.Text(text='', key='img_msg', size=(40, 2))]
         ], vertical_alignment='top'),
         sg.VerticalSeparator(),
@@ -38,7 +39,7 @@ tab1_layout = [
             [sg.Text(text="Text", key='text_heading')],
             [sg.Multiline(default_text='Type your message here.', size=(40, 15), key='message')],
             [sg.Text(text='', key='secret_message_text', size=(40, 2))],
-            [sg.Column([[sg.Button(button_text="Encrypt", key='data_encryption_button')]])]
+            [sg.Column([[sg.Button(button_text="Encode", key='data_encryption_button')]])]
         ], vertical_alignment='top')
     ]
 ]
@@ -62,8 +63,8 @@ tab2_layout = [
         sg.Column([
             [sg.Text(text="Text", key='decrypted_message_heading')],
             [sg.Multiline(size=(40, 15), disabled=True, key='decrypted_message')],
-            [sg.Text(text='', key='decrypted_text', size=(40, 2))],
-            [sg.Column([[sg.Button(button_text="Decrypt", key='data_decryption_button')]])]
+            [sg.Text(text='', key='decode_message', size=(40, 2))],
+            [sg.Column([[sg.Button(button_text="Decode", key='data_decryption_button')]])]
         ], vertical_alignment='top')
     ]
 ]
@@ -84,7 +85,7 @@ tab3_layout = [
 layout = [
     [
         sg.TabGroup([
-            [sg.Tab("Encrypt", tab1_layout), sg.Tab("Decrypt", tab2_layout), sg.Tab("Key Generator", tab3_layout)]
+            [sg.Tab("Encode", tab1_layout), sg.Tab("Decode", tab2_layout), sg.Tab("Key Generator", tab3_layout)]
         ])
     ]
 ]
@@ -117,12 +118,12 @@ while True:
 # Without using any encryption method
         if values['no_encryption_radio'] is False:
             if not os.path.exists(values['public_key']):
-                window['public_key_msg'].update("Invalid PEM file", text_color='red')
+                window['public_key_msg'].update("Public Key didn't Entered", text_color='red')
 
 # Hiding message in image file
         if values['img_checkbox']:
             if not os.path.exists(values['img_file']):
-                window['img_msg'].update("PNG File not Given", text_color='red')
+                window['img_msg'].update("Image File not Given", text_color='red')
 
 # Using RSA Encryption without using Steganography
         try:
@@ -256,13 +257,13 @@ while True:
 # Data Dencryption and Unhiding in Stego Media
     elif event == 'data_decryption_button':
         if not os.path.exists(values['encrypted_file']):
-            window['encrypted_message_file'].update("Invalid file", text_color='red')
+            window['encrypted_message_file'].update("Encrypted File didn't Selected", text_color='red')
 
 # Selecting private key
         try:
             if str(values['encrypted_file']).split('.')[-1].lower() != 'png':
                 if not os.path.exists(values['private_key']):
-                    window['private_key_message'].update("Invalid PEM file", text_color='red')
+                    window['private_key_message'].update("Private Key didn't Entered", text_color='red')
 
                 else:
                     privateKey = crypto.ImportKey(values['private_key'])
@@ -271,16 +272,16 @@ while True:
                     if str(file[0:4], 'utf-8') == 'enct':
                         decrypted = str(crypto.DecryptRSA(file[4:], privateKey), 'utf-8')
                         window['decrypted_message'].update(decrypted)
-                        window['decrypt_message'].update("Successfully decrypted file", text_color='green')
+                        window['decode_message'].update("Successfully decrypted file", text_color='green')
 
                     elif str(file[0:4], 'utf-8') == '12en':
                         if str(file[0:14], 'utf-8') == '12enc_text_aes':
                             decrypted, header = crypto.DecryptAES(values['encrypted_file'], values['private_key'])
                             window['decrypted_message'].update(str(decrypted, 'utf-8'))
-                            window['decrypt_message'].update("Successfully decrypted file", text_color='green')
+                            window['decode_message'].update("Successfully decrypted file", text_color='green')
 
                     elif not os.path.exists(values['decrypt_file_output_fol']):
-                        window['decrypt_file_output_fol_message'].update("Invalid folder", text_color='red')
+                        window['decrypt_file_output_fol_message'].update("Output Folder not given", text_color='red')
 
                     elif str(file[0:4], 'utf-8') == 'encf':
                         fileExtLength = int(chr(file[4]) + chr(file[5]))
@@ -295,7 +296,7 @@ while True:
                         except Exception:
                             window['decrypted_message'].update("Saved decrypted data to file.")
 
-                        window['decrypt_message'].update("Successfully decrypted file", text_color='green')
+                        window['decode_message'].update("Successfully decrypted file", text_color='green')
 
                     elif str(file[0:14], 'utf-8').find('enc_file_aes') != -1:
                         decrypted, header = crypto.DecryptAES(values['encrypted_file'], values['private_key'])
@@ -309,11 +310,11 @@ while True:
                         except Exception:
                             window['decrypted_message'].update("Saved decrypted data to file.")
 
-                        window['decrypt_message'].update("Successfully decrypted file", text_color='green')
+                        window['decode_message'].update("Successfully decrypted file", text_color='green')
 
                     else:
                         window['decrypted_message'].update('')
-                        window['decrypt_message'].update("Unable to decrypt file\n" + "unknown file", text_color='red')
+                        window['decode_message'].update("Unable to decrypt file\n" + "unknown file", text_color='red')
 
             elif str(values['encrypted_file']).split('.')[-1].lower() == 'png':
                 if os.path.exists(values['encrypted_file']):
@@ -328,7 +329,7 @@ while True:
 
                     if file[0:4] == 'plnt':
                         window['decrypted_message'].update(file[4:])
-                        window['decrypt_message'].update('Successfully decrypted file', text_color='green')
+                        window['decode_message'].update('Successfully decrypted file', text_color='green')
 
                     elif file[0:4] == 'plnf':
                         fileExtLength = int(file[4])
@@ -342,7 +343,7 @@ while True:
                         except Exception:
                             window['decrypted_message'].update("Saved decrypted data to file.")
 
-                        window['decrypt_message'].update("Successfully decrypted file", text_color='green')
+                        window['decode_message'].update("Successfully decrypted file", text_color='green')
 
                     elif not os.path.exists(values['private_key']):
                         window['private_key_message'].update("Invalid PEM file", text_color='red')
@@ -352,7 +353,7 @@ while True:
                         if file[0:4] == 'enct':
                             decrypted = str(crypto.DecryptRSA(bytes.fromhex(file[4:]), privateKey), 'utf-8')
                             window['decrypted_message'].update(decrypted)
-                            window['decrypt_message'].update("Successfully decrypted file", text_color='green')
+                            window['decode_message'].update("Successfully decrypted file", text_color='green')
 
                         elif not os.path.exists(values['decrypt_file_output_fol']):
                             window['decrypt_file_output_fol_message'].update("Invalid folder", text_color='red')
@@ -365,7 +366,7 @@ while True:
                                 decrypted, header = crypto.DecryptAES(values['decrypt_file_output_fol'] + '/aes_text_fromhex_temp', values['private_key'])
                                 os.remove(values['decrypt_file_output_fol'] + '/aes_text_fromhex_temp')
                                 window['decrypted_message'].update(str(decrypted, 'utf-8'))
-                                window['decrypt_message'].update("Successfully decrypted file", text_color='green')
+                                window['decode_message'].update("Successfully decrypted file", text_color='green')
 
                             elif str(filefromhex[0:14], 'utf-8').find('enc_file_aes') != -1:
                                 with open(values['decrypt_file_output_fol'] + '/aes_file_fromhex_temp', 'wb') as tempFile:
@@ -383,7 +384,7 @@ while True:
                                     window['decrypted_message'].update("Saved decrypted data to file.")
 
                                 os.remove(values['decrypt_file_output_fol'] + '/aes_file_fromhex_temp')
-                                window['decrypt_message'].update("Successfully decrypted file", text_color='green')
+                                window['decode_message'].update("Successfully decrypted file", text_color='green')
 
                         elif file[0:4] == 'encf':
                             fileExtLength = int(file[4] + file[5])
@@ -398,15 +399,15 @@ while True:
                             except Exception:
                                 window['decrypted_message'].update("Saved decrypted data to file.")
 
-                            window['decrypt_message'].update("Successfully decrypted file", text_color='green')
+                            window['decode_message'].update("Successfully decrypted file", text_color='green')
 
                     else:
                         window['decrypted_message'].update('')
-                        window['decrypt_message'].update("Unable to decrypt file\n" + "unknown file", text_color='red')
+                        window['decode_message'].update("Unable to decrypt file\n" + "unknown file", text_color='red')
 
         except Exception as exception:
             window['decrypted_message'].update('')
-            window['decrypt_message'].update("Unable to decrypt file\n" + str(exception), text_color='red')
+            window['decode_message'].update("Unable to decrypt file\n" + str(exception), text_color='red')
 
     if values['text_radio']:
         window['message'].update(disabled=False)
