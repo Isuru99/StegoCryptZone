@@ -1,6 +1,7 @@
 import os.path
 import PySimpleGUI as sg
 import ImgStego as stego
+import Encryption as crypto
 
 
 sg.theme('DarkTeal9')
@@ -167,7 +168,7 @@ while True:
                         if values['text_radio']:
                             publicKey = crypto.ImportKey(values['public_key'])
                             encrypted = 'enct' + str(bytes.hex(crypto.EncryptRSA(values['message'], publicKey)))
-                            stego.Encode(values['img_file'], encrypted, values['output_fol'] + '/encrypted.png')
+                            stego.Encode(values['img_file'], encrypted, values['output_fol'] + '/encrypted.png' or 'encrypted.jpg')
                             window['secret_message_text'].update("Successfully encrypted", text_color='green')
 
 # Encrypting file using RSA encryption & Hiding that message inside image file
@@ -179,7 +180,7 @@ while True:
                             file = open(values['file'], 'rb').read()
                             publicKey = crypto.ImportKey(values['public_key'])
                             encrypted = 'encf' + str(len(fileExt)) + fileExt + str(bytes.hex(crypto.EncryptRSA(str(file.hex()), publicKey)))
-                            stego.Encode(values['img_file'], encrypted, values['output_fol'] + '/encrypted.png')
+                            stego.Encode(values['img_file'], encrypted, values['output_fol'] + '/encrypted.png' or 'encrypted.jpg')
                             window['secret_message_text'].update("Successfully encrypted", text_color='green')
 
 # Using AES Encryption without using Steganography
@@ -216,7 +217,7 @@ while True:
 # Encrypting text message using AES encryption & Hiding that message inside image file
                         if values['text_radio']:
                             header, sessionKeyEncrypted, nonce, tag, ciphertext = crypto.EncryptAES(values['message'], values['public_key'], header='enc_text_aes')
-                            stego.Encode(values['img_file'], bytes.hex(header) + bytes.hex(sessionKeyEncrypted) + bytes.hex(nonce) + bytes.hex(tag) + bytes.hex(ciphertext), values['output_fol'] + '/encrypted.png')
+                            stego.Encode(values['img_file'], bytes.hex(header) + bytes.hex(sessionKeyEncrypted) + bytes.hex(nonce) + bytes.hex(tag) + bytes.hex(ciphertext), values['output_fol'] + '/encrypted.png' or 'encrypted.jpg')
                             window['secret_message_text'].update("Successfully encrypted", text_color='green')
 
 # Encrypting file using AES encryption & Hiding that message inside image file
@@ -227,7 +228,7 @@ while True:
 
                             file = open(values['file'], 'rb').read()
                             header, sessionKeyEncrypted, nonce, tag, ciphertext = crypto.EncryptAES(bytes.hex(file), values['public_key'], header='enc_file_aes_' + fileExt)
-                            stego.Encode(values['img_file'], bytes.hex(header) + bytes.hex(sessionKeyEncrypted) + bytes.hex(nonce) + bytes.hex(tag) + bytes.hex(ciphertext), values['output_fol'] + '/encrypted.png')
+                            stego.Encode(values['img_file'], bytes.hex(header) + bytes.hex(sessionKeyEncrypted) + bytes.hex(nonce) + bytes.hex(tag) + bytes.hex(ciphertext), values['output_fol'] + '/encrypted.png' or 'encrypted.jpg')
                             window['secret_message_text'].update("Successfully encrypted", text_color='green')
 
 # Image Steganography without using encryption
@@ -238,7 +239,7 @@ while True:
 
 # Text message hide inside image
                     if values['text_radio']:
-                        stego.Encode(values['img_file'], 'plnt' + values['message'], values['output_fol'] + '/encrypted.png')
+                        stego.Encode(values['img_file'], 'plnt' + values['message'], values['output_fol'] + '/encrypted.png' or 'encrypted.jpg')
                         window['secret_message_text'].update("Successfully encrypted", text_color='green')
 
 # File hide inside image
@@ -248,7 +249,7 @@ while True:
                             fileExt = 'file'
 
                         file = open(values['file'], 'rb').read()
-                        stego.Encode(values['img_file'], 'plnf' + str(len(fileExt)) + fileExt + bytes.hex(file), values['output_fol'] + '/encrypted.png')
+                        stego.Encode(values['img_file'], 'plnf' + str(len(fileExt)) + fileExt + bytes.hex(file), values['output_fol'] + '/encrypted.png' or 'encrypted.jpg')
                         window['secret_message_text'].update("Successfully encrypted", text_color='green')
 
         except Exception as exception:
@@ -261,9 +262,10 @@ while True:
 
 # Selecting private key
         try:
-            if str(values['encrypted_file']).split('.')[-1].lower() != 'png':
+            if str(values['encrypted_file']).split('.')[-1].lower() != 'png' or 'jpg':
                 if not os.path.exists(values['private_key']):
                     window['private_key_message'].update("Private Key didn't Entered", text_color='red')
+
 
                 else:
                     privateKey = crypto.ImportKey(values['private_key'])
@@ -316,7 +318,7 @@ while True:
                         window['decrypted_message'].update('')
                         window['decode_message'].update("Unable to decrypt file\n" + "unknown file", text_color='red')
 
-            elif str(values['encrypted_file']).split('.')[-1].lower() == 'png':
+            elif str(values['encrypted_file']).split('.')[-1].lower() == 'png' or 'jpg':
                 if os.path.exists(values['encrypted_file']):
                     window['encrypted_message_file'].update('')
                     window['private_key_message'].update('')
