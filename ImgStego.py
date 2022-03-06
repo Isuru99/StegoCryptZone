@@ -61,8 +61,7 @@ def Encode(imagePath, data, output):
     image = Image.open(imagePath, 'r')
     newImage = image.copy()
     encode_enc(newImage, data)
-    newImage.save(output, '')
-
+    newImage.save(output, 'PNG')
 
 
 def Decode(imagePath):

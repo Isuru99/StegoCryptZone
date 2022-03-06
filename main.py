@@ -1,8 +1,7 @@
-import os.path
+import os
 import PySimpleGUI as sg
 import ImgStego as stego
 import Encryption as crypto
-
 
 sg.theme('DarkTeal9')
 
@@ -12,19 +11,19 @@ tab1_layout = [
         sg.Column([
             [sg.Radio("AES Encryption", group_id='aes_rsa_radios', key='aes_radio', default=True, enable_events=True)],
             [sg.Radio("RSA Encryption", group_id='aes_rsa_radios', key='rsa_radio', default=False, enable_events=True)],
-            [sg.Radio("Do not Encrypt", group_id='aes_rsa_radios', key='no_encryption_radio', default=False, enable_events=True)],
+            [sg.Radio("Do not encrypt", group_id='aes_rsa_radios', key='no_encryption_radio', default=False, enable_events=True)],
             [sg.Checkbox("Hide data inside image", key='img_checkbox', default=True, enable_events=True)],
 
-            [sg.Text(text="Output Folder", key='output_fol_heading')],
+            [sg.Text(text="Output folder", key='output_fol_heading')],
             [sg.Column([[sg.Input(key='output_fol'), sg.FolderBrowse(key='output_fol_browse')]], key='output_fol_row')],
-            [sg.Text(text='', key='output_fol_msg', size=(40, 2))],
+            [sg.Text(text='', key='output_fol_message', size=(40, 2))],
 
-            [sg.Text(text="Public Key", key='public_key_heading')],
+            [sg.Text(text="Public key", key='public_key_heading')],
             [sg.Column([[sg.Input(key='public_key', disabled_readonly_background_color='black'), sg.FileBrowse(key='public_key_browse', file_types=(('PEM Files', '*.pem'), ))]], key='public_key_row')],
             [sg.Text(text='', key='public_key_msg', size=(40, 2))],
 
-            [sg.Text(text="Image File", key='img_heading')],
-            [sg.Column([[sg.Input(key='img_file', disabled_readonly_background_color='black'), sg.FileBrowse(key='img_browse', file_types=(('PNG Files', '*.png'), ('JPEG', '*.jpg')))]], key='img_row')],
+            [sg.Text(text="Image file", key='img_heading')],
+            [sg.Column([[sg.Input(key='img_file', disabled_readonly_background_color='black'), sg.FileBrowse(key='img_browse', file_types=(('PNG Files', '*.png'), ))]], key='img_row')],
             [sg.Text(text='', key='img_msg', size=(40, 2))]
         ], vertical_alignment='top'),
         sg.VerticalSeparator(),
@@ -45,6 +44,7 @@ tab1_layout = [
     ]
 ]
 
+#Defining tab 2
 tab2_layout = [
     [
         sg.Column([
@@ -52,11 +52,11 @@ tab2_layout = [
             [sg.Column([[sg.Input(key='encrypted_file'), sg.FileBrowse(key='encrypted_file_browse')]], key='encrypted_file_row')],
             [sg.Text(text='', key='encrypted_message_file', size=(40, 2))],
 
-            [sg.Text(text="Enter Your Private Key", key='private_key_heading')],
+            [sg.Text(text="Enter Your Private Key", key='private_key_title')],
             [sg.Column([[sg.Input(key='private_key'), sg.FileBrowse(key='private_key_browse', file_types=(('PEM Files', '*.pem'), ))]], key='private_key_row')],
             [sg.Text(text='', key='private_key_message', size=(40, 2))],
 
-            [sg.Text(text="Output Folder", key='decrypt_file_output_fol_heading')],
+            [sg.Text(text="Output folder", key='decrypt_file_output_fol_heading')],
             [sg.Column([[sg.Input(key='decrypt_file_output_fol', disabled_readonly_background_color='black'), sg.FolderBrowse(key='decrypt_file_output_fol_browse')]], key='decrypt_file_output_fol_row')],
             [sg.Text(text='', key='decrypt_file_output_fol_message', size=(40, 2))]
         ], vertical_alignment='top'),
@@ -70,15 +70,16 @@ tab2_layout = [
     ]
 ]
 
+#Defining tab 3
 tab3_layout = [
     [
         sg.Column([
-            [sg.Text("Key Size")],
+            [sg.Text("Key size")],
             [sg.Combo(('2048', '3072', '4096', '8192'), default_value='2048', key='key_size_combo')],
             [sg.Text("Output Folder")],
             [sg.Column([[sg.Input(key='keys_output_fol'), sg.FolderBrowse(key='keys_output_fol_browse')]], key='keys_output_fol_row')],
             [sg.Text(text='', key='keys_output_fol_message', size=(40, 2))],
-            [sg.Button(button_text="Generate keys", key='generate_button')]
+            [sg.Button(button_text="Generate Keys", key='generate_button')]
         ], vertical_alignment='top')
     ]
 ]
@@ -109,12 +110,12 @@ while True:
                 window['keys_output_fol_message'].update("Successfully created public and private key pairs", text_color='green')
 
             except Exception as exception:
-                window['keys_output_fol_message'].update("Unable to generate key pair\n" + str(exception), text_color='red')
+                window['keys_output_fol_message'].update("Unable to create public and private key pairs\n" + str(exception), text_color='red')
 
 # Data Encryption and Hiding in Stego Media
     elif event == 'data_encryption_button':
         if not os.path.exists(values['output_fol']):
-            window['output_fol_msg'].update("Output Folder not Defined", text_color='red')
+            window['output_fol_message'].update("Output Folder not Defined", text_color='red')
 
 # Without using any encryption method
         if values['no_encryption_radio'] is False:
@@ -126,22 +127,23 @@ while True:
             if not os.path.exists(values['img_file']):
                 window['img_msg'].update("Image File not Given", text_color='red')
 
-# Using RSA Encryption without using Steganography
+        # Using RSA Encryption without using Steganography
         try:
             if values['rsa_radio']:
                 if not values['img_checkbox']:
                     if os.path.exists(values['output_fol']) and os.path.exists(values['public_key']):
-                        window['output_fol_msg'].update('')
+                        window['output_fol_message'].update('')
                         window['public_key_msg'].update('')
 
-# Encrypting text message using RSA encryption
+                        # Encrypting text message using RSA encryption
                         if values['text_radio']:
                             with open(values['output_fol'] + '/encrypted', 'wb') as outputFile:
                                 publicKey = crypto.ImportKey(values['public_key'])
                                 outputFile.write(b'enct' + crypto.EncryptRSA(values['message'], publicKey))
                                 window['secret_message_text'].update("Successfully encrypted", text_color='green')
 
-# Encrypting File using RSA encryption
+
+                        # Encrypting File using RSA encryption
                         elif values['file_radio']:
                             with open(values['output_fol'] + '/encrypted', 'wb') as outputFile:
                                 fileExt = str(values['file']).split('.')[-1].lower()
@@ -157,21 +159,21 @@ while True:
                                 outputFile.write(b'encf' + bytes(fileExtLength, 'utf-8') + bytes(fileExt, 'utf-8') + crypto.EncryptRSA(str(file.hex()), publicKey))
                                 window['secret_message_text'].update("Successfully encrypted", text_color='green')
 
-# Using RSA Encryption with using Steganography
+                # Using RSA Encryption with using Steganography
                 elif values['img_checkbox']:
                     if os.path.exists(values['output_fol']) and os.path.exists(values['public_key']) and os.path.exists(values['img_file']):
-                        window['output_fol_msg'].update('')
+                        window['output_fol_message'].update('')
                         window['public_key_msg'].update('')
                         window['img_msg'].update('')
 
-# Encrypting text message using RSA encryption & Hiding that message inside image file
+                        # Encrypting text message using RSA encryption & Hiding that message inside image file
                         if values['text_radio']:
                             publicKey = crypto.ImportKey(values['public_key'])
                             encrypted = 'enct' + str(bytes.hex(crypto.EncryptRSA(values['message'], publicKey)))
-                            stego.Encode(values['img_file'], encrypted, values['output_fol'] + '/encrypted.png' or 'encrypted.jpg')
-                            window['secret_message_text'].update("Successfully encrypted", text_color='green')
+                            stego.Encode(values['img_file'], encrypted, values['output_fol'] + '/encrypted.png')
+                            window['secret_message_text'].update("Successfully encoded", text_color='green')
 
-# Encrypting file using RSA encryption & Hiding that message inside image file
+                        # Encrypting file using RSA encryption & Hiding that message inside image file
                         elif values['file_radio']:
                             fileExt = str(values['file']).split('.')[-1].lower()
                             if fileExt.find('/') != -1:
@@ -180,23 +182,23 @@ while True:
                             file = open(values['file'], 'rb').read()
                             publicKey = crypto.ImportKey(values['public_key'])
                             encrypted = 'encf' + str(len(fileExt)) + fileExt + str(bytes.hex(crypto.EncryptRSA(str(file.hex()), publicKey)))
-                            stego.Encode(values['img_file'], encrypted, values['output_fol'] + '/encrypted.png' or 'encrypted.jpg')
-                            window['secret_message_text'].update("Successfully encrypted", text_color='green')
+                            stego.Encode(values['img_file'], encrypted, values['output_fol'] + '/encrypted.png')
+                            window['secret_message_text'].update("Successfully encoded", text_color='green')
 
-# Using AES Encryption without using Steganography
+            # Using AES Encryption without using Steganography
             elif values['aes_radio']:
                 if not values['img_checkbox']:
                     if os.path.exists(values['output_fol']) and os.path.exists(values['public_key']):
-                        window['output_fol_msg'].update('')
+                        window['output_fol_message'].update('')
                         window['public_key_msg'].update('')
 
-# Encrypting text message using AES encryption
+                        # Encrypting text message using AES encryption
                         if values['text_radio']:
                             with open(values['output_fol'] + '/encrypted', 'wb') as outputFile:
                                 crypto.EncryptAES(values['message'], values['public_key'], values['output_fol'] + '/encrypted', 'enc_text_aes')
                                 window['secret_message_text'].update("Successfully encrypted", text_color='green')
 
-# Encrypting text message using RSA encryption
+                        # Encrypting text message using RSA encryption
                         elif values['file_radio']:
                             with open(values['output_fol'] + '/encrypted', 'wb') as outputFile:
                                 fileExt = str(values['file']).split('.')[-1].lower()
@@ -207,20 +209,20 @@ while True:
                                 crypto.EncryptAES(bytes.hex(file), values['public_key'], values['output_fol'] + '/encrypted', 'enc_file_aes_' + fileExt)
                                 window['secret_message_text'].update("Successfully encrypted", text_color='green')
 
-# Using AES Encryption with using Steganography
+                # Using AES Encryption with using Steganography
                 elif values['img_checkbox']:
                     if os.path.exists(values['output_fol']) and os.path.exists(values['public_key']) and os.path.exists(values['img_file']):
-                        window['output_fol_msg'].update('')
+                        window['output_fol_message'].update('')
                         window['public_key_msg'].update('')
                         window['img_msg'].update('')
 
-# Encrypting text message using AES encryption & Hiding that message inside image file
+                        # Encrypting text message using AES encryption & Hiding that message inside image file
                         if values['text_radio']:
                             header, sessionKeyEncrypted, nonce, tag, ciphertext = crypto.EncryptAES(values['message'], values['public_key'], header='enc_text_aes')
-                            stego.Encode(values['img_file'], bytes.hex(header) + bytes.hex(sessionKeyEncrypted) + bytes.hex(nonce) + bytes.hex(tag) + bytes.hex(ciphertext), values['output_fol'] + '/encrypted.png' or 'encrypted.jpg')
-                            window['secret_message_text'].update("Successfully encrypted", text_color='green')
+                            stego.Encode(values['img_file'], bytes.hex(header) + bytes.hex(sessionKeyEncrypted) + bytes.hex(nonce) + bytes.hex(tag) + bytes.hex(ciphertext), values['output_fol'] + '/encrypted.png')
+                            window['secret_message_text'].update("Successfully encoded", text_color='green')
 
-# Encrypting file using AES encryption & Hiding that message inside image file
+                        # Encrypting file using AES encryption & Hiding that message inside image file
                         elif values['file_radio']:
                             fileExt = str(values['file']).split('.')[-1].lower()
                             if fileExt.find('/') != -1:
@@ -228,44 +230,43 @@ while True:
 
                             file = open(values['file'], 'rb').read()
                             header, sessionKeyEncrypted, nonce, tag, ciphertext = crypto.EncryptAES(bytes.hex(file), values['public_key'], header='enc_file_aes_' + fileExt)
-                            stego.Encode(values['img_file'], bytes.hex(header) + bytes.hex(sessionKeyEncrypted) + bytes.hex(nonce) + bytes.hex(tag) + bytes.hex(ciphertext), values['output_fol'] + '/encrypted.png' or 'encrypted.jpg')
-                            window['secret_message_text'].update("Successfully encrypted", text_color='green')
+                            stego.Encode(values['img_file'], bytes.hex(header) + bytes.hex(sessionKeyEncrypted) + bytes.hex(nonce) + bytes.hex(tag) + bytes.hex(ciphertext), values['output_fol'] + '/encrypted.png')
+                            window['secret_message_text'].update("Successfully encoded", text_color='green')
 
-# Image Steganography without using encryption
+            # Image Steganography without using encryption
             elif values['no_encryption_radio'] and values['img_checkbox']:
                 if os.path.exists(values['output_fol']) and os.path.exists(values['img_file']):
-                    window['output_fol_msg'].update('')
+                    window['output_fol_message'].update('')
                     window['img_msg'].update('')
 
-# Text message hide inside image
+                    # Text message hide inside image
                     if values['text_radio']:
-                        stego.Encode(values['img_file'], 'plnt' + values['message'], values['output_fol'] + '/encrypted.png' or 'encrypted.jpg')
-                        window['secret_message_text'].update("Successfully encrypted", text_color='green')
+                        stego.Encode(values['img_file'], 'plnt' + values['message'], values['output_fol'] + '/encrypted.png')
+                        window['secret_message_text'].update("Successfully encoded", text_color='green')
 
-# File hide inside image
+                    # File hide inside imag
                     elif values['file_radio']:
                         fileExt = str(values['file']).split('.')[-1].lower()
                         if fileExt.find('/') != -1:
                             fileExt = 'file'
 
                         file = open(values['file'], 'rb').read()
-                        stego.Encode(values['img_file'], 'plnf' + str(len(fileExt)) + fileExt + bytes.hex(file), values['output_fol'] + '/encrypted.png' or 'encrypted.jpg')
-                        window['secret_message_text'].update("Successfully encrypted", text_color='green')
+                        stego.Encode(values['img_file'], 'plnf' + str(len(fileExt)) + fileExt + bytes.hex(file), values['output_fol'] + '/encrypted.png')
+                        window['secret_message_text'].update("Successfully encoded", text_color='green')
 
         except Exception as exception:
             window['secret_message_text'].update("Unable to encrypt\n" + str(exception), text_color='red')
 
-# Data Dencryption and Unhiding in Stego Media
+    # Data Dencryption and Unhiding in Stego Media
     elif event == 'data_decryption_button':
         if not os.path.exists(values['encrypted_file']):
             window['encrypted_message_file'].update("Encrypted File didn't Selected", text_color='red')
 
-# Selecting private key
+        # Selecting private key
         try:
-            if str(values['encrypted_file']).split('.')[-1].lower() != 'png' or 'jpg':
+            if str(values['encrypted_file']).split('.')[-1].lower() != 'png':
                 if not os.path.exists(values['private_key']):
                     window['private_key_message'].update("Private Key didn't Entered", text_color='red')
-
 
                 else:
                     privateKey = crypto.ImportKey(values['private_key'])
@@ -348,7 +349,7 @@ while True:
                         window['decode_message'].update("Successfully decrypted file", text_color='green')
 
                     elif not os.path.exists(values['private_key']):
-                        window['private_key_message'].update("Invalid PEM file", text_color='red')
+                        window['private_key_message'].update("Private Key didn't Entered", text_color='red')
 
                     elif os.path.exists(values['private_key']):
                         privateKey = crypto.ImportKey(values['private_key'])
@@ -358,7 +359,7 @@ while True:
                             window['decode_message'].update("Successfully decrypted file", text_color='green')
 
                         elif not os.path.exists(values['decrypt_file_output_fol']):
-                            window['decrypt_file_output_fol_message'].update("Invalid folder", text_color='red')
+                            window['decrypt_file_output_fol_message'].update("Output Folder not define", text_color='red')
 
                         elif type(filefromhex) == bytes:
                             if str(filefromhex[0:14], 'utf-8') == '12enc_text_aes':
