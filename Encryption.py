@@ -6,11 +6,11 @@ from Crypto.Random import get_random_bytes
 def GenerateKeyPair(dir = '', size = 2048):
     keyPair = RSA.generate(size)
     privateKey = keyPair.export_key()
-    with open(dir + '/' + str(size) + '_private.pem', 'wb') as outputFile:
+    with open(dir + '/' + str(size) + 'Private.pem', 'wb') as outputFile:
         outputFile.write(privateKey)
 
     publicKey = keyPair.publickey().export_key()
-    with open(dir + '/' + str(size) + '_public.pem', 'wb') as outputFile:
+    with open(dir + '/' + str(size) + 'Public.pem', 'wb') as outputFile:
         outputFile.write(publicKey)
 
 
