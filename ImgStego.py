@@ -1,6 +1,6 @@
 from PIL import Image
 
-
+# Convert encoding data into 8-bit binary form using ASCII value of characters
 def GenerateData(data, bin = False):
     newData = []
     for i in data:
@@ -8,13 +8,15 @@ def GenerateData(data, bin = False):
 
     return newData
 
-
+# Pixels are modified according to the 8-bit binary data and finally returned
 def ModifyPixels(pix, data):
     datalist = GenerateData(data)
     lendata = len(datalist)
     imdata = iter(pix)
     for i in range(lendata):
+        # Extracting 3 pixels at a time
         pix = [value for value in imdata.__next__()[:3] + imdata.__next__()[:3] + imdata.__next__()[:3]]
+        # Pixel value should be made odd for 1 and even for 0
         for j in range(0, 8):
             if (datalist[i][j] == '0' and pix[j] % 2 != 0):
                 pix[j] -= 1
@@ -25,7 +27,7 @@ def ModifyPixels(pix, data):
 
                 else:
                     pix[j] += 1
-
+        # Eighth pixel of every set tells whether to stop ot read further. 0 means keep reading; 1 means the message is end.
         if (i == lendata - 1):
             if (pix[-1] % 2 == 0):
                 if(pix[-1] != 0):
@@ -43,7 +45,7 @@ def ModifyPixels(pix, data):
         yield pix[3:6]
         yield pix[6:9]
 
-
+ # Putting modified pixels in the new image
 def encode_enc(newImage, data):
     width = newImage.size[0]
     (x, y) = (0, 0)
@@ -56,20 +58,21 @@ def encode_enc(newImage, data):
         else:
             x += 1
 
-
+# Encoding data into image
 def Encode(imagePath, data, output):
     image = Image.open(imagePath, 'r')
     newImage = image.copy()
     encode_enc(newImage, data)
     newImage.save(output, 'PNG')
 
-
+# Decoding the data from the image
 def Decode(imagePath):
     image = Image.open(imagePath, 'r')
     data = ''
     imgdata = iter(image.getdata())
     while (True):
         pixels = [value for value in imgdata.__next__()[:3] + imgdata.__next__()[:3] + imgdata.__next__()[:3]]
+        # String of binary data
         binstr = ''
         for i in pixels[:8]:
             if (i % 2 == 0):
