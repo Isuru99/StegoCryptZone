@@ -78,7 +78,7 @@ tab3_layout = [
     [
         sg.Column([
             [sg.Text("Key Size")],
-            [sg.Combo(('2048', '3072', '4096'), default_value='3072', key='key_size_combo')],
+            [sg.Combo(('2048', '3072', '4096'), default_value='2048', key='key_size_combo')],
             [sg.Text("Output Folder")],
             [sg.Column([[sg.Input(key='keys_output_fol'), sg.FolderBrowse(key='keys_output_fol_browse')]], key='keys_output_fol_row')],
             [sg.Text(text='', key='keys_output_fol_message', size=(40, 2))],
