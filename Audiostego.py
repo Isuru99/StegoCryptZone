@@ -20,7 +20,7 @@ def AudioEncode(path, message, output):
 
     print(message)
 
-  #char->ascii(int)->binaryRepresentation->remove 0b prefix
+  #char->ASCII(int)->binaryRepresentation->remove 0b prefix
     x = [bin(ord(i)).lstrip('0b') for i in message]
   #make it in the form of 8bits i.e 1 byte. Eg: 5: 101 -> 00000101
     y = [i.rjust(8, '0') for i in x]

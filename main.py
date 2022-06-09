@@ -164,9 +164,6 @@ while True:
                             if fileExt.find('/') != -1:
                                 fileExt = 'file'
 
-                        fileExtLength = str(len(fileExt))
-                        if len(fileExtLength) == 1:
-                            fileExtLength = '0' + fileExtLength
                             file = open(values['file'], 'rb').read()
                             publicKey = crypto.ImportKey(values['public_key'])
                             encrypted = 'encf' + str(len(fileExt)) + fileExt + str(
